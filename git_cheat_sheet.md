@@ -1,11 +1,13 @@
-git add file1 file2
-adding the files to the local storage
+#Basic git commands
 
-git status
-gives you an insight of the status of your repository
+##adding
+git add file1 file2 adding the files to the local storage
 
-git commit -m 
-commiting the files to the local repository
+##question of status
+git status gives you an insight of the status of your repository
 
-git push
-commiting the files to the online repository
+##commiting
+git commit -m commiting the files to the local repository
+
+#push
+git push commiting the files to the online repository
