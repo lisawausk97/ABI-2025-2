@@ -1,17 +1,21 @@
-#Basic git commands
+# Basic git commands
 
-##adding
+## adding
+
 git add file1 file2 
 adding the files to the local storage
 
-##question of status
+## question of status
+
 git status 
 gives you an insight of the status of your repository
 
-##commiting
+## commiting
+
 git commit -m 
 commiting the files to the local repository
 
-##push
+## push
+
 git push 
 commiting the files to the online repository
