@@ -1,13 +1,7 @@
 # Basic git commands
 
 ## adding
-
-git add file1 file2 
-adding the files to the local storage
-
-## question of status
-
-git status 
+ 
 gives you an insight of the status of your repository
 
 ## commiting
