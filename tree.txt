@@ -1,0 +1,24 @@
+.
+├── anotherfile.txt
+├── countLines.sh
+├── dir1
+│   └── file1
+├── dir2
+│   └── file2
+├── dir3
+│   ├── bla
+│   ├── blub
+│   │   └── AnotherDirectory
+│   └── file3
+├── dirWithAVeryLongName
+│   └── aFile.txt
+├── dir_with_a_very_long_underscored_name
+│   ├── another_file.txt
+│   └── subdir_with_long_name
+│       └── hello_file.txt
+├── git_cheat_sheet.md
+├── history.txt
+├── mytext.md
+└── tree.txt
+
+10 directories, 12 files
