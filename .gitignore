@@ -1,0 +1,8 @@
+.nextflow.log*
+.nextflow/
+work/
+dir1/
+dir2/
+dir3/
+dirWithAVeryLongName/
+dir_with_a_very_long_underscored_name/
