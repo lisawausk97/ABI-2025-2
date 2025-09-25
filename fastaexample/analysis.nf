@@ -1,7 +1,11 @@
 nextflow.enable.dsl = 2
 
+params.out = "/home/lisawausk/ABI-2025-2/fastaexample/"
+params.temp = "${baseDir}/downloads"
+params.repeat = "GCCGCG"
+
 process downloadFile {
-	publishDir "/home/lisawausk/ABI-2025-2/fastaexample/", mode: "copy", overwrite: true
+	storeDir params.temp
 	output: 
 		path "batch1.fasta"
 	"""
@@ -10,7 +14,7 @@ process downloadFile {
 }
 
 process countSeqs {
-	publishDir "/home/lisawausk/ABI-2025-2/fastaexample/", mode: "copy", overwrite: true
+	publishDir params.out, mode: "copy", overwrite: true
 	input:
 		path fastafile
 	output: 
@@ -21,18 +25,49 @@ process countSeqs {
 }
 
 process splitSeq {
-	publishDir "/home/lisawausk/ABI-2025-2/fastaexample/", mode: "copy", overwrite: true
+	/*publishDir params.out, mode: "copy", overwrite: true*/
 	input:
-		path inputfile
+		path fastafile
 	output:
 		path "Sequence_0*"
 """
-split -l 2 -d --additional-suffix .fasta ${inputfile} Sequence_
+split -l 2 -d --additional-suffix .fasta ${fastafile} Sequence_
+"""
+}
+
+process countRepeats {
+	/*publishDir params.out, mode: "copy", overwrite: true*/
+	input:
+		path fastafile
+	output:
+		path "${fastafile.getSimpleName()}_repcount.txt"
+"""
+grep -o "${params.repeat}" ${fastafile} | wc -l > ${fastafile.getSimpleName()}_repcount.txt
+"""
+}
+
+process makeSummary {
+	input: 
+		path infiles
+	output: 
+		path "summary.csv"
+"""
+echo "# Sequence number, number of repeats" > summary.csv
+for f in \$(ls Sequence_0*_repcount.txt); do echo -n "\$f, " >> summary.csv; cat \$f >> summary.csv; done
 """
 }
 
 workflow {
+downloadChannel = downloadFile()
+countSeqs(downloadChannel)
+downloadChannel | splitSeq | flatten | countRepeats | collect | makeSummary
+}
+
+/*workflow {
 	downloadChannel = downloadFile()
 	countSeqs(downloadChannel)
-	splitSeq(downloadChannel)
-}
+	splitChannel = splitSeq(downloadChannel)
+	splitChannelflat = splitChannel.flatten()
+	countRepeats(splitChannelflat)
+	makeSummary(countRepeats.out.collect())
+}*/
