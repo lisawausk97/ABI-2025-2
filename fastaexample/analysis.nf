@@ -3,6 +3,8 @@ nextflow.enable.dsl = 2
 params.out = "/home/lisawausk/ABI-2025-2/fastaexample/"
 params.temp = "${baseDir}/downloads"
 params.repeat = "GCCGCG"
+params.indir = null
+params.downloadurl = "wget https://tinyurl.com/cqbatch1"
 
 process downloadFile {
 	storeDir params.temp
@@ -58,7 +60,15 @@ for f in \$(ls Sequence_0*_repcount.txt); do echo -n "\$f, " >> summary.csv; cat
 }
 
 workflow {
-downloadChannel = downloadFile()
+	if(params.downloadurl != null && params.indir == null) {
+		downloadChannel = downloadFile()
+	} 
+	else if(params.indir != null && params.downloadurl == null) {
+		downloadChannel = channel.fromPath("${params.indir}/*.fasta")
+	}
+	else {
+		error("Error: Please provide either --downloadurl or --indir on the commandline.")
+	}
 countSeqs(downloadChannel)
 downloadChannel | splitSeq | flatten | countRepeats | collect | makeSummary
 }

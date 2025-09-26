@@ -12,3 +12,7 @@ Sequence_*.txt
 basecount.txt
 downloads/
 summary.csv
+dag.html
+report.html
+test/
+timeline.html
