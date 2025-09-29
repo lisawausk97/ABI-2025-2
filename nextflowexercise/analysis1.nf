@@ -3,7 +3,7 @@ nextflow.enable.dsl = 2
 params.out = "/home/lisawausk/ABI-2025-2/nextflowexercise/"
 params.temp = "${baseDir}/downloads" 
 params.start = "ATG"
-params.stop = "TAA, TAG, TGA"
+params.stop = "TAA | TAG | TGA"
 
 process downloadFile {
     storeDir params.temp
@@ -55,32 +55,32 @@ process countStop {
     output:
         path "${fastafile.getSimpleName()}_stopcount.txt"
     """
-    grep -o "${params.stop}" ${fastafile} | wc -l > ${fastafile.getSimpleName()}_stopcount.txt
+    grep -o -E "${params.stop}" ${fastafile} | wc -l > ${fastafile.getSimpleName()}_stopcount.txt
     """
 }
 
-makeSummary {
+process makeSummary {
     publishDir params.out, mode: "copy", overwrite: true
     input: 
-        inputfiles
+        path startcounts
+        path stopcounts
     output:
-        "summary.csv"
+        path "summary.csv"
     """
     for f in \$(ls *count.txt); do echo -n "\$f, " >> summary.csv; cat \$f >> summary.csv; done
     """
 }
 
 workflow {
-    downloadFile | splitSAM | flatten | convertToFasta
-    startChannel = countStart(convertToFasta)
-    stopChannel = countStop(convertToFasta)
-    makeSummary(startChannel.out)
-    makeSummary(stopChannel.out)
+    fastaChannel = (downloadFile | splitSAM | flatten | convertToFasta)
+    startChannel = countStart(fastaChannel)
+    stopChannel = countStop(fastaChannel)
+    makeSummary(startChannel.collect(), stopChannel.collect())
+}
 
     /*mainChannel = downloadFile | splitSAM | flatten | convertToFasta
     startChannel = channel.of(countStart(mainChannel))
     stopChannel = channel.of(countStop(mainChannel))
     summaryChannel = channel.of(makeSummary())
     summaryChannel.concat(startChannel, stopChannel).view()*/
-}
 
