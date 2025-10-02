@@ -2,14 +2,14 @@ nextflow.enable.dsl = 2
 
 params.out = "./results"
 params.temp = "${baseDir}/downloads" 
-params.accession = "SRR1777174"
+params.accession = "accessions.txt"
 params.with_fastqc = false
 params.with_stats = false
 params.with_fastp = false 
-params.cut_window_size = 4
+/*params.cut_window_size = 4
 params.cut_mean_quality = 20
 params.length_required = 50
-params.average_qual = 20
+params.average_qual = 20*/
 
 process prefetch {
     storeDir params.temp
@@ -53,7 +53,7 @@ process fastqc {
         path fastqfile
     output:
         path "${fastqfile.getSimpleName()}_fastqc.zip"
-        path "${fastqfile.getSimpleName()}_fastqc.html"
+        /*path "${fastqfile.getSimpleName()}_fastqc.html"*/
     """
     fastqc -o . ${fastqfile}
     """
@@ -71,21 +71,35 @@ process fastP {
     """
 }
 
+process multiQC {
+    publishDir params.out, mode: "copy", overwrite: true
+    container "https://depot.galaxyproject.org/singularity/multiqc%3A1.29--pyhdfd78af_0"
+    input: 
+        path fastqfile
+    output: 
+        path "multiqc_*"
+    """
+    multiqc .
+    """
+}
+
 workflow {
-   mainChannel = channel.from(params.accession) | prefetch | convertToFastq
+   accessionChannel = channel.fromPath(params.accession).splitText().map{it -> it.trim()} 
+   mainChannel = accessionChannel | prefetch | convertToFastq
 
     if (params.with_stats) {
         generateStats(mainChannel)
     }
 
     if (params.with_fastqc) {
-        fastqc(mainChannel)
+        qcChannel = fastqc(mainChannel)
     }
 
     if (params.with_fastp) {
-        fastP(mainChannel)
+        fastPChannel = fastP(mainChannel)
     }
     
+    multiQC(qcChannel.collect())
 
     /*if (params.with_fastp) {
         mainChannel | fastP
